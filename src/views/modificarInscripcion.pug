@@ -1,0 +1,30 @@
+extends index
+block contenido
+    .py-10
+        h1.text-4xl.my-10.font-extrabold.text-center Proyecto
+            span.font-normal Universidad
+        h2.text-center.text-2xl.font-extrabold= pagina
+
+        if errores
+            div(class="max-w-md mx-auto my-10")
+                each error in errores
+                    p.bg-red-600.text-white.uppercase.text-xs.text-center.p-2.mb-1.font-bold= error.msg
+
+        .mt-8.mx-auto.max-w-md
+            .bg-white.py-8.px-4.shadow
+                form(method='POST' action=`/estudiantes/${inscripcion.id}?_method=PUT` noValidate)
+                    
+                    div
+                        label.block.text-sm.uppercase.text-gray-500.mb-3.font-bold(for="estudiante_id") Estudiante
+                        input#estudiante.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(placeholder="Estudiante" type="text" name="estudiante" value=inscripcion.estudiante_id)
+                    
+                    div
+                        label.block.text-sm.uppercase.text-gray-500.mb-3.font-bold(for="curso_id") Curso
+                        input#curso.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(placeholder="Curso" type="text" name="curso" value=inscripcion.curso_id)
+                    
+                    div
+                        label.block.text-sm.uppercase.text-gray-500.mb-3.font-bold(for="nota") Nota
+                        input#nota.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(placeholder="Nota" type="text" name="Nota" value=inscripcion.nota)
+                    
+                    
+                    button.bg-blue-500.text-white.px-4.py-2.rounded-md.mt-4(type='submit') Modificar Inscripcion

@@ -1,0 +1,43 @@
+extends ./index
+
+block contenido
+    .py-10
+        h1.text-4xl.my-10.font-extrabold.text-center Proyecto
+            span.font-normal Universidad
+        h2.text-center.text-2xl.font-extrabold= pagina
+
+        if errores
+            div(class="max-w-md mx-auto my-10")
+                each error in errores
+                    p.bg-red-600.text-white.uppercase.text-xs.text-center.p-2.mb-1.font-bold= error.msg
+
+        .mt-8.mx-auto.max-w-md
+            .bg-white.py-8.px-4.shadow
+                form.space-y-5(method='POST' action='/CursosEstudiantes' noValidate)
+                    
+                    div
+                        label.block.text-sm.uppercase.text-gray-500.mb-3.font-bold(for="estudiante_id") Estudiante
+                        select#estudiante.w-full.px-3.py-2.border.border-gray-300.rounded-md(name="estudiante_id")
+                            option(value='') Selecciona un Estudiante
+                            
+                                if estudiantes && estudiantes.length > 0
+                                    each estudiante in estudiantes
+                                        option(value=estudiante.id selected=inscripcion && inscripcion.estudiante_id == estudiante.id)= estudiante.nombre + " " + estudiante.apellido
+                                else
+                                    option(value='') No hay estudiantes disponibles
+
+                    div
+                        label.block.text-sm.uppercase.text-gray-500.mb-3.font-bold(for="curso_id") Curso
+                        select#curso.w-full.px-3.py-2.border.border-gray-300.rounded-md(name="curso_id")
+                            option(value='') Selecciona un Curso
+                                if cursos && cursos.length > 0
+                                    each curso in cursos
+                                        option(value=curso.id selected=inscripcion && inscripcion.curso_id == curso.id)= curso.nombre
+                                else
+                                    option(value='') No hay cursos disponibles
+ 
+                    div
+                        label.block.text-sm.uppercase.text-gray-500.mb-3.font-bold(for="nota") Nota
+                        input#nota.w-full.px-3.py-2.border.border-gray-300.rounded-md(placeholder="Nota" type="text" name="nota" value=inscripcion? inscripcion.nota : '')
+
+                    input(class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 cursor-pointer" type="submit" value="Registrar Inscripción")
