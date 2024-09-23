@@ -4,14 +4,15 @@ block contenido
     .flex.justify-end.mb-4
         ul.flex.space-x-4
             li
-                a(href="/CursosEstudiantes/creaInscripciones" class="text-green-600 hover:text-green-800") Agregar Inscripciones
+                a(href="/CursosEstudiantes/creaInscripciones" class="text-black font-bold hover:text-green-800") Agregar Inscripciones
+
 
     .py-10
         h1.text-4xl.my-10.font-extrabold.text-center Proyecto
             span.font-normal Universidad
         h2.text-center.text-2xl.font-extrabold= pagina
       
-        form(action="/CursosEstudiantes/listarInscripciones", method="GET")
+        form(action="/CursosEstudiantes/listarInscripciones" method="GET")
             .flex
                 select(name="estudiante_id" class="border rounded p-2 mr-4")
                     option(value="") Seleccionar Estudiante
@@ -35,18 +36,21 @@ block contenido
             tbody
                 each inscripcion in cursoEstudiante
                     tr
-                        td.px-6.py-4= inscripcion.estudiante ? inscripcion.estudiante.nombre : 'No disponible'
+                        td.px-6.py-4= inscripcion.estudiante ? inscripcion.estudiante.nombre  : 'No disponible'
                         td.px-6.py-4= inscripcion.curso ? inscripcion.curso.nombre : 'No disponible'
                         td.px-6.py-4= inscripcion.nota
                         td.px-6.py-4
-                            a.text-blue-500(href=`/CursosEstudiantes/modificaInscripciones/${inscripcion.estudiante_id}-${inscripcion.curso_id}`) Editar
-                            a.text-red-500.ml-2(href="#", onclick=`eliminarInscripciones(${inscripcion.estudiante_id}-${inscripcion.curso_id}`) Eliminar
+                            a.text-blue-500(href=`/CursosEstudiantes/modificarInscripcion/${inscripcion.estudiante_id}/${inscripcion.curso_id}`) Editar
+
+                            a.text-red-500.ml-2(href="#", onclick=`eliminarIncripcion('${inscripcion.estudiante_id}','${inscripcion.curso_id}')`) Eliminar
+
+
 
 block scripts
     script.
-        function eliminarIncripcion(id) {
+        function eliminarIncripcion(estudiante_id, curso_id) {
             if (confirm('¿Estás seguro de que deseas eliminar esta inscripción?')) {
-                fetch(`/CursosEstudiantes/${id}`, {
+                fetch(`/CursosEstudiantes/${estudiante_id}/${curso_id}`, {
                     method: 'DELETE'
                 })
                 .then(response => response.json())

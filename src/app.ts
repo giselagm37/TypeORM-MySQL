@@ -41,6 +41,9 @@ app.use('/estudiantes', estudianteRouter);
 app.use('/profesores',profesorRouter );
 app.use('/cursos', cursoRouter );
 app.use('/CursosEstudiantes',inscripcionRouter);
+app.post('/CursosEstudiantes/actualizarInscripcion/:idEstudiante/:idCurso', (req, res) => {
+   
+});
 
 export default app;
 

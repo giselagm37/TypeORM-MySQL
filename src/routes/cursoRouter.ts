@@ -29,6 +29,7 @@ router.get('/creaCursos', (req, res) => {
 router.post('/', validar(), insertar);
 
 //modificar
+
 router.get('/modificaCurso/:id', async (req, res) => {
     try {
         const curso = await consultarUno(req, res); 
