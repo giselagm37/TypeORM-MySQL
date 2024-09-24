@@ -10,11 +10,10 @@ var cursoEstudiante: CursoEstudiante[];
 export const validar = () => [
     check('estudiante_id')
         .notEmpty().withMessage('El id es obligatorio')
-        .isNumeric().withMessage('El ID debe ser un número')
-        .isLength({ min: 4 }).withMessage('Debe introducir un número válido'),
+        .isNumeric().withMessage('El ID debe ser un número'),
     check('curso_id')
         .notEmpty().withMessage('El id es obligatorio')
-        .isLength({ min: 4 }).withMessage('Debe introducir un numero valido'),
+        .isNumeric().withMessage('El ID debe ser un número'),
     check('calificacion').isFloat({ min: 0, max: 10 }).withMessage('La calificación debe ser un número entre 0 y 10'),    
         (req: Request, res: Response, next: NextFunction) => {
             const errores = validationResult(req);
@@ -172,7 +171,7 @@ export const validar = () => [
             const cursoEstudianteRepository = AppDataSource.getRepository(CursoEstudiante);
             const inscripciones = await cursoEstudianteRepository.find({
                 where: whereConditions,
-                relations: ["curso", "estudiante"] // Asegúrate de incluir las relaciones necesarias
+                relations: ["curso", "estudiante"] // relaciones
             });
     
             if (inscripciones.length === 0) {
@@ -204,14 +203,13 @@ export const validar = () => [
                 estudiantes,
                 cursos
             });
-            console.log(cursos);
-            console.log(estudiantes);
+          
         } catch (error) {
             console.error(error);
             res.status(500).send('Error al cargar el formulario de inscripción');
         }
     };   
- /*  export const inscribir = async (req: Request, res: Response) => {
+/*  export const inscribir = async (req: Request, res: Response) => {
         const errores = validationResult(req);
         
         // Verifica si hay errores de validación
@@ -270,8 +268,8 @@ export const validar = () => [
                     estudiante: existeEstudiante,
                     nota: calificacion // Asegúrate de que esto sea el campo correcto
                 });*/
-                /*
-                const nuevaInscripcion = cursoEstudianteRepository.create({
+                
+              /*  const nuevaInscripcion = cursoEstudianteRepository.create({
                     
                     estudiante_id: Number(estudiante_id), // Usar el id directamente
                     curso_id:  Number(curso_id), // Usar el id directamente
@@ -292,7 +290,7 @@ export const validar = () => [
             }
         }
     };*/
-    export const inscribir = async (req: Request, res: Response) => {
+   export const inscribir = async (req: Request, res: Response) => {
         const errores = validationResult(req);
         
         // Verifica si hay errores de validación
@@ -313,7 +311,7 @@ export const validar = () => [
         // Convierte a número
         const estudianteId = Number(req.body.estudiante_id);
         const cursoId = Number(req.body.curso_id);
-        const calificacion = req.body.calificacion; // Asume que esta viene como número también
+        const calificacion = req.body.calificacion; 
     
         try {
             await AppDataSource.transaction(async (transactionalEntityManager) => {
@@ -360,82 +358,40 @@ export const validar = () => [
             }
         }
     };
-    
-
-/*export const cancelarInscripcion = async(req:Request, res:Response): Promise<void> => {
+ /* export const eliminarInscripcion = async (req: Request, res: Response): Promise<void> => {
         const { estudiante_id, curso_id } = req.params;
-
+      
         try {
-            console.log(`ID recibido para eliminar: ${curso_id}`); 
-            await AppDataSource.transaction(async transactionalEntityManager => {
-                //verificamos el estudiante
-                const estudiante = await transactionalEntityManager.findOne(Estudiante, { where: { id: parseInt(estudiante_id, 10) } });
-                if (!estudiante) {
-                    throw new Error('Estudiante no existe');
-                }
-
-           //verificamos el curso
-                const curso = await transactionalEntityManager.findOne(Curso, { where: { id: parseInt(curso_id, 10) } });
-                if (!curso) {
-                    throw new Error('Estudiante no existe');
-                }
-
-                const inscripcion = await transactionalEntityManager.findOne(CursoEstudiante, {
-                    where: {
-                        estudiante: { id: parseInt(estudiante_id, 10) },
-                        curso: { id: parseInt(curso_id, 10) }
-                    }
-                });
-                if (!inscripcion) {
-                    throw new Error('Estudiante no existe');
-                }
- 
-                if (inscripcion.nota > 0) {
-                    throw new Error('No se puede cancelar la inscripción porque el estudiante ya ha sido calificado');
-                }
-               
-                await transactionalEntityManager.remove(inscripcion);
-
-                res.status(200).json({ mens: 'Inscripción cancelada' });
+          await AppDataSource.transaction(async (transactionalEntityManager) => {
+            const inscripcion = await transactionalEntityManager.findOneOrFail(CursoEstudiante, {
+              where: {
+                estudiante_id: Number(estudiante_id),
+                curso_id: Number(curso_id),
+              },
             });
-        } 
-      catch(err){
-        if (err instanceof Error) {
-            res.status(400).json({ mensaje: err.message });
-        } else {
-            res.status(500).json({ mensaje: 'Ocurrió un error inesperado' });
-        }
-    }
-};*/
-export const cancelarInscripcion = async (req: Request, res: Response) => {
-    const { estudiante_id, curso_id } = req.params;
-    console.log(`/CursosEstudiantes/${estudiante_id}/${curso_id}`);
-
-
-    try {
-        const cursoEstudianteRepository = AppDataSource.getRepository(CursoEstudiante);
-        
-        // Busca la inscripción a eliminar
-        const inscripcion = await cursoEstudianteRepository.findOne({
-            where: {
-                estudiante: { id: Number(estudiante_id) },
-                curso: { id: Number(curso_id) }
+      
+            const estudianteRepository = transactionalEntityManager.getRepository(Estudiante);
+            const estudiante = await estudianteRepository.findOne({
+              where: { id: Number(estudiante_id) },
+            });
+      
+            if (!estudiante) {
+              throw new Error('Estudiante no encontrado');
             }
-        });
-
-        if (!inscripcion) {
-            return res.status(404).json({ mensaje: 'Inscripción no encontrada' });
+      
+            await transactionalEntityManager.remove(inscripcion);
+          });
+      
+          res.status(200).json({ mensaje: 'Inscripción eliminada' });
+        } catch (err) {
+          if (err instanceof Error) {
+            res.status(400).json({ mensaje: err.message });
+          } else {
+            res.status(500).json({ mensaje: 'Ocurrió un error inesperado' });
+          }
         }
-
-        // Elimina la inscripción
-        await cursoEstudianteRepository.remove(inscripcion);
-        
-        return res.json({ mensaje: 'Inscripción eliminada' });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ mensaje: 'Error al eliminar inscripción' });
-    }
-};
+      };*/
+      
 
 
 
@@ -522,3 +478,41 @@ export const calificar = async (req: Request, res: Response) => {
             res.status(500).send('Error al actualizar la inscripción');
         }
     };
+    export const eliminar = async (req: Request, res: Response) => {
+        const { estudiante_id, curso_id } = req.params;
+      
+        if (!estudiante_id || !curso_id) {
+          return res.status(400).json({ mensaje: 'Faltan parámetros' });
+        }
+      
+        try {
+          await AppDataSource.transaction(async (transactionalEntityManager) => {
+            const cursoEstudianteRepository = transactionalEntityManager.getRepository(CursoEstudiante);
+      
+            // Verificar si la inscripción existe
+            const inscripcion = await cursoEstudianteRepository.findOne({
+              where: {
+                estudiante_id: Number(estudiante_id),
+                curso_id: Number(curso_id),
+              },
+            });
+      
+            if (!inscripcion) {
+              throw new Error('La inscripción no existe');
+            }
+      
+      
+            // Eliminar la inscripción
+            await cursoEstudianteRepository.remove(inscripcion);
+      
+            return res.json({ mensaje: 'Inscripción eliminada' });
+          });
+        } catch (err) {
+          if (err instanceof Error) {
+            return res.status(400).json({ mensaje: err.message });
+          } else {
+            return res.status(400).json({ mensaje: 'Error inesperado' });
+          }
+        }
+      };
+    

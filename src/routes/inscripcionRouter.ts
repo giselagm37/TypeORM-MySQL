@@ -4,7 +4,7 @@ import express from 'express';
 import {
     inscribir,
     calificar,
-    cancelarInscripcion,
+    eliminar,
     validar,
     consultarPorFiltro,
     consultarInscripciones,
@@ -23,7 +23,7 @@ router.get('/CursosEstudiantes/listarInscripciones', consultarPorFiltro);
 
 // Insertar inscripciones
 router.get('/creaInscripciones', mostrarFormularioInscripcion);  // Usa el controlador para renderizar el formulario
-router.post('/inscribir', validar(), inscribir);  // Validar antes de inscribir
+router.post('/creaInscripciones',validar(), inscribir);  // Validar antes de inscribir
 
 // Modificar inscripciones
 router.get('/modificarInscripcion/:estudiante_id/:curso_id', mostrarFormularioModificacion);
@@ -34,7 +34,7 @@ router.post('/calificar', calificar);
 router.post('/actualizarInscripcion/:estudiante_id/:curso_id', actualizarInscripcion);
 // Eliminar inscripciones
 
-router.delete('/CursosEstudiantes/:estudiante_id/:curso_id', cancelarInscripcion);
+router.delete('/:estudiante_id/:curso_id', eliminar);
 
 
 

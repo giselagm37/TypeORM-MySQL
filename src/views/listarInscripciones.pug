@@ -42,29 +42,29 @@ block contenido
                         td.px-6.py-4
                             a.text-blue-500(href=`/CursosEstudiantes/modificarInscripcion/${inscripcion.estudiante_id}/${inscripcion.curso_id}`) Editar
 
-                            a.text-red-500.ml-2(href="#", onclick=`eliminarIncripcion('${inscripcion.estudiante_id}','${inscripcion.curso_id}')`) Eliminar
+                            a.text-red-500.ml-2(href="#", onclick=`eliminar('${inscripcion.estudiante_id}','${inscripcion.curso_id}')`) Eliminar
 
 
 
 block scripts
     script.
-        function eliminarIncripcion(estudiante_id, curso_id) {
+        function eliminar(estudiante_id, curso_id) {
             if (confirm('¿Estás seguro de que deseas eliminar esta inscripción?')) {
-                fetch(`/CursosEstudiantes/${estudiante_id}/${curso_id}`, {
+                fetch(`/CursosEstudiantes/${estudiante_id}/${curso_id}`,{
                     method: 'DELETE'
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.mensaje === 'Inscripción eliminada') {
-                        alert('Inscripción eliminada con éxito.');
-                        window.location.reload(); 
+                        alert ('Inscripción eliminada con exito ');
+                        window.location.reload();
                     } else {
-                        alert(data.mensaje); 
+                        alert(data.mensaje);
                     }
                 })
-                .catch(error => {
+                .catch(error =>{
                     console.error('Error:', error);
-                    alert('Error al eliminar inscripción.');
-                });
+                    alert('Error al eliminar la inscripción');
+                })
             }
         }
