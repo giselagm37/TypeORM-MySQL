@@ -209,7 +209,7 @@ export const validar = () => [
             res.status(500).send('Error al cargar el formulario de inscripción');
         }
     };   
-/*  export const inscribir = async (req: Request, res: Response) => {
+  export const inscribir = async (req: Request, res: Response) => {
         const errores = validationResult(req);
         
         // Verifica si hay errores de validación
@@ -269,7 +269,7 @@ export const validar = () => [
                     nota: calificacion // Asegúrate de que esto sea el campo correcto
                 });*/
                 
-              /*  const nuevaInscripcion = cursoEstudianteRepository.create({
+               const nuevaInscripcion = cursoEstudianteRepository.create({
                     
                     estudiante_id: Number(estudiante_id), // Usar el id directamente
                     curso_id:  Number(curso_id), // Usar el id directamente
@@ -289,146 +289,12 @@ export const validar = () => [
                 res.status(500).send(err.message);
             }
         }
-    };*/
-   export const inscribir = async (req: Request, res: Response) => {
-        const errores = validationResult(req);
-        
-        // Verifica si hay errores de validación
-        if (!errores.isEmpty()) {
-            // Maneja errores
-            const estudianteRepository = AppDataSource.getRepository(Estudiante);
-            const cursoRepository = AppDataSource.getRepository(Curso);
-            
-            const estudiantes = await estudianteRepository.find();
-            const cursos = await cursoRepository.find();
-            return res.render('creaInscripciones', {
-                pagina: 'Crear Inscripción',
-                estudiantes,
-                cursos
-            });
-        }
-        
-        // Convierte a número
-        const estudianteId = Number(req.body.estudiante_id);
-        const cursoId = Number(req.body.curso_id);
-        const calificacion = req.body.calificacion; 
-    
-        try {
-            await AppDataSource.transaction(async (transactionalEntityManager) => {
-                const cursoRepository = transactionalEntityManager.getRepository(Curso);
-                const estudianteRepository = transactionalEntityManager.getRepository(Estudiante);
-                const cursoEstudianteRepository = transactionalEntityManager.getRepository(CursoEstudiante);
-    
-                // Verifica si el estudiante existe
-                const existeEstudiante = await estudianteRepository.findOne({ where: { id: estudianteId } });
-                if (!existeEstudiante) {
-                    return res.status(404).json({ mensaje: 'El estudiante no existe.' });
-                }
-    
-                // Verifica si el curso existe
-                const existeCurso = await cursoRepository.findOne({ where: { id: cursoId } });
-                if (!existeCurso) {
-                    return res.status(404).json({ mensaje: 'El curso no existe.' });
-                }
-    
-                // Verifica si el estudiante ya está inscrito en el curso
-                const inscripto = await cursoEstudianteRepository.findOne({
-                    where: { estudiante: { id: estudianteId }, curso: { id: cursoId } }
-                });
-                if (inscripto) {
-                    return res.status(400).json({ mensaje: 'El estudiante ya está inscripto en este curso.' });
-                }
-    
-                // Crea la nueva inscripción
-                const nuevaInscripcion = cursoEstudianteRepository.create({
-                    curso: existeCurso,
-                    estudiante: existeEstudiante,
-                    nota: calificacion
-                });
-                await cursoEstudianteRepository.save(nuevaInscripcion);
-            });
-    
-            // Redirige a la lista de inscripciones
-            res.redirect('/CursosEstudiantes/listarInscripciones');
-          
-        } catch (err) {
-            console.error(err);
-            if (err instanceof Error) {
-                res.status(500).send(err.message);
-            }
-        }
     };
- /* export const eliminarInscripcion = async (req: Request, res: Response): Promise<void> => {
-        const { estudiante_id, curso_id } = req.params;
-      
-        try {
-          await AppDataSource.transaction(async (transactionalEntityManager) => {
-            const inscripcion = await transactionalEntityManager.findOneOrFail(CursoEstudiante, {
-              where: {
-                estudiante_id: Number(estudiante_id),
-                curso_id: Number(curso_id),
-              },
-            });
-      
-            const estudianteRepository = transactionalEntityManager.getRepository(Estudiante);
-            const estudiante = await estudianteRepository.findOne({
-              where: { id: Number(estudiante_id) },
-            });
-      
-            if (!estudiante) {
-              throw new Error('Estudiante no encontrado');
-            }
-      
-            await transactionalEntityManager.remove(inscripcion);
-          });
-      
-          res.status(200).json({ mensaje: 'Inscripción eliminada' });
-        } catch (err) {
-          if (err instanceof Error) {
-            res.status(400).json({ mensaje: err.message });
-          } else {
-            res.status(500).json({ mensaje: 'Ocurrió un error inesperado' });
-          }
-        }
-      };*/
-      
-
-
-
-export const calificar = async (req: Request, res: Response) => {
-        const { curso_id, estudiante_id, calificacion } = req.body;
-    
-        try {
-            // Buscar Inscripcion
-            const cursoEstudianteRepository = AppDataSource.getRepository(CursoEstudiante);
-            const calificado = await cursoEstudianteRepository.findOne({
-                where: { curso: { id: curso_id }, estudiante: { id: estudiante_id } }
-            });
-    
-            if (!calificado) {
-                return res.status(404).send('El estudiante no está inscrito en el curso');
-            }
-    
-            // Asignar la calificación
-            calificado.nota = calificacion;  
-
-           // Guardar la actualización
-           await cursoEstudianteRepository.save(calificado);
-    
-            return res.json({ mensaje: 'Calificación asignada correctamente' });
-
-          
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                return res.status(500).json({ mensaje: err.message });
-            }
-        }
-    }; 
-    
-    export const mostrarFormularioModificacion = async (req: Request, res: Response) => {
+   
+    export const modificar = async (req: Request, res: Response) => {
         try {
             const { estudiante_id, curso_id } = req.params;
-            
+    
             const cursoEstudianteRepository = AppDataSource.getRepository(CursoEstudiante);
             const cursoEstudiante = await cursoEstudianteRepository.findOne({
                 where: {
@@ -442,16 +308,30 @@ export const calificar = async (req: Request, res: Response) => {
                 return res.status(404).send('Inscripción no encontrada');
             }
     
+            // Obtener todos los estudiantes y cursos para los desplegables
+            const estudianteRepository = AppDataSource.getRepository(Estudiante);
+            const cursoRepository = AppDataSource.getRepository(Curso);
+            
+            const estudiantes = await estudianteRepository.find();
+            const cursos = await cursoRepository.find();
+    
+            // Asegúrate de que los datos se están pasando correctamente a la vista
             res.render('modificarInscripcion', {
                 pagina: 'Modificar Inscripción',
-                cursoEstudiante
+                cursoEstudiante,
+                estudiantes,
+                cursos
             });
         } catch (error) {
             console.error(error);
             res.status(500).send('Error al cargar el formulario de modificación');
         }
     };
-    export const actualizarInscripcion = async (req: Request, res: Response) => {
+    
+ 
+    
+
+   export const actualizarInscripcion = async (req: Request, res: Response) => {
         try {
             const { estudiante_id, curso_id } = req.params;
             const { nota } = req.body;
@@ -477,7 +357,8 @@ export const calificar = async (req: Request, res: Response) => {
             console.error(error);
             res.status(500).send('Error al actualizar la inscripción');
         }
-    };
+    }
+  
     export const eliminar = async (req: Request, res: Response) => {
         const { estudiante_id, curso_id } = req.params;
       

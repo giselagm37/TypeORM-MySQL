@@ -2,16 +2,7 @@
 
 import express from 'express';
 import {
-    inscribir,
-    calificar,
-    eliminar,
-    validar,
-    consultarPorFiltro,
-    consultarInscripciones,
-    mostrarFormularioModificacion,
-    mostrarFormularioInscripcion,
-    actualizarInscripcion
-} from '../controllers/InscripcionController';
+    inscribir, eliminar, validar,consultarPorFiltro, consultarInscripciones,  modificar,actualizarInscripcion ,mostrarFormularioInscripcion} from '../controllers/InscripcionController';
 
 const router = express.Router();
 
@@ -22,14 +13,13 @@ router.get('/listarInscripciones/estudiante_id', consultarxAlumno);*/
 router.get('/CursosEstudiantes/listarInscripciones', consultarPorFiltro);
 
 // Insertar inscripciones
-router.get('/creaInscripciones', mostrarFormularioInscripcion);  // Usa el controlador para renderizar el formulario
+router.get('/creaInscripciones',mostrarFormularioInscripcion);  // Usa el controlador para renderizar el formulario*/, mostrarFormularioInscripcion
 router.post('/creaInscripciones',validar(), inscribir);  // Validar antes de inscribir
 
 // Modificar inscripciones
-router.get('/modificarInscripcion/:estudiante_id/:curso_id', mostrarFormularioModificacion);
+router.get('/modificarInscripcion/:estudiante_id/:curso_id', modificar);
 
-// Calificar
-router.post('/calificar', calificar);
+
 
 router.post('/actualizarInscripcion/:estudiante_id/:curso_id', actualizarInscripcion);
 // Eliminar inscripciones

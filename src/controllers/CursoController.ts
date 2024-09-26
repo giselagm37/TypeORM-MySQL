@@ -70,7 +70,7 @@ export const consultarUno = async (req: Request, res: Response): Promise<Curso |
             }
         }
     };
-
+/*
 export const insertar = async (req: Request, res: Response) => {  
     console.log(req.body);
     const errores = validationResult(req);
@@ -83,7 +83,6 @@ export const insertar = async (req: Request, res: Response) => {
     const { nombre, descripcion, profesor_id } = req.body;
     
     try {
-        console.log(req.body);
 
         await AppDataSource.transaction(async transactionalEntityManager => {
                
@@ -128,6 +127,59 @@ export const insertar = async (req: Request, res: Response) => {
             }
         }
     }
+     */
+    export const insertar = async (req: Request, res: Response) => {
+        const errores = validationResult(req);
+        
+    
+        // Manejo de errores de validación
+        if (!errores.isEmpty()) {
+            const profesorRepository = AppDataSource.getRepository(Profesor);
+            const profesores = await profesorRepository.find();
+            return res.render('creaCursos', {
+                pagina: 'Crear Curso',
+                profesores,
+                cursos
+            });
+        }
+    
+        const { nombre, descripcion, profesor_id } = req.body;
+    
+        try {
+            await AppDataSource.transaction(async transactionalEntityManager => {
+                const profesorRepository = transactionalEntityManager.getRepository(Profesor);
+                const cursoRepository = transactionalEntityManager.getRepository(Curso);
+                const existeProfesor = await profesorRepository.findOne({ where: { id: Number(profesor_id) } });
+                
+                if (!existeProfesor) {
+                    throw new Error('El profesor no existe.');
+                }
+    
+                const existeCurso = await cursoRepository.findOne({
+                    where: [
+                        { nombre },
+                        { descripcion }
+                    ]
+                });
+    
+                if (existeCurso) {
+                    throw new Error('El curso ya existe.');
+                }
+    
+                const nuevoCurso = cursoRepository.create({ 
+                    nombre, descripcion, profesor: existeProfesor });
+                await cursoRepository.save(nuevoCurso);
+            });
+           
+            res.redirect('/cursos/listarCursos'); 
+        } catch (err: unknown) {
+            console.error(err); // Registro del error
+            if (err instanceof Error) {
+                res.status(500).send(err.message);
+            }
+        }
+    };
+     
 export const modificar = async (req: Request, res: Response) => {
 
         const { id } = req.params;
