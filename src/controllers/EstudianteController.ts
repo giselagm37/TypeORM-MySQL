@@ -28,6 +28,7 @@ export const validar = () => [
     }
 ];
 
+
 export const consultarTodos = async (req: Request, res: Response) => {
     try {
         const estudianteRepository = AppDataSource.getRepository(Estudiante);

@@ -30,6 +30,8 @@ export const validar = () => [
 ];
 
 
+
+
 export const consultarTodos = async (req: Request, res: Response) => {
     try {
         const profesorRepository = AppDataSource.getRepository(Profesor);

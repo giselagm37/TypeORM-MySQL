@@ -26,8 +26,11 @@ block contenido
                     
                     div
                         label.block.text-sm.uppercase.text-gray-500.mb-3.font-bold(for="profesor_id") Profesor
-                        input#profesor.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(placeholder="Profesor" type="text" name="profesor_id" value=curso? curso.profesor.id: '')
-                        
+                        select#profesor_id.w-full.px-3.py-2.border.border-gray-300.rounded-md(name="profesor_id")
+                            option(value='') -- Selecciona un profesor --
+                                if profesores && profesores.length
+                                    each profesor in profesores
+                                        option(value=profesor.id)= `${profesor.nombre} ${profesor.apellido}`
 
 
                     input(class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 cursor-pointer" type="submit" value="Registrar Curso")

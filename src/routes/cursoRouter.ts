@@ -1,27 +1,21 @@
-
-
 import express from 'express';
-import { insertar, modificar, eliminar, validar, consultarUno, consultarTodos } from '../controllers/CursoController';
+import {mostrarFormularioCrearCurso, insertar, formularioModificar, modificar, eliminar, validar, consultarTodos,consultarPorFiltro } from '../controllers/CursoController';
 
 const router = express.Router();
 
 router.get('/listarCursos', consultarTodos);
-
+router.get('/cursos/listarCursos', consultarPorFiltro);
 //insertar
 
-router.get('/creaCursos', (req, res) => {
-    res.render('creaCursos', {
-        pagina: 'Crear Curso',
-    });
-});
-
+router.get('/creaCursos', mostrarFormularioCrearCurso);
 router.post('/', validar(), insertar);
 
 //modificar
 
+router.get('/modificaCurso/:id', formularioModificar);
 router.get('/modificaCurso/:id', async (req, res) => {
     try {
-        const curso = await consultarUno(req, res); 
+        const curso = await formularioModificar(req, res); 
         if (!curso) {
             return res.status(404).send('Curso no encontrado');
         }
@@ -34,7 +28,6 @@ router.get('/modificaCurso/:id', async (req, res) => {
         }
     }
 });
-
 router.put('/:id', modificar); 
 
 //eliminar

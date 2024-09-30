@@ -15,7 +15,7 @@ block contenido
                             option(value='') -- Seleccione un estudiante --
                                 if estudiantes && estudiantes.length
                                     each estudiante in estudiantes
-                                        option(value=estudiante.id)= estudiante.nombre
+                                        option(value=estudiante.id)= estudiante.nombre + ' ' + estudiante.apellido
 
                     
                     div
@@ -29,7 +29,8 @@ block contenido
                  
                     div
                         label.block.text-sm.uppercase.text-gray-500.mb-3.font-bold(for="calificacion") Calificación
-                        input#calificacion.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(placeholder="Calificación" type="number" name="calificacion" step="0.01" min="0" max="10" required)
+                        input#calificacion.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(placeholder="Calificación" type="number" name="calificacion" step="0.01" min="0" max="10")
+                        
 
                     .flex.items-center.justify-between
                         button(type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 cursor-pointer") Inscribir

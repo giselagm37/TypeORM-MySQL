@@ -4,3 +4,16 @@ body {
     background-repeat: no-repeat; /* Para evitar que se repita la imagen */
     background-position: center; /* Para centrar la imagen */
 }
+.borrar{
+    background-image: url('../image/eliminar.png');
+}
+.agregar{
+    background-image: url('../image/agregar.png');
+}   
+.editar{
+    background-image: url('../image/editar.png');
+}
+.agregarPersona{
+    background-image: url('../image/agregar-usuario.png');
+    
+}

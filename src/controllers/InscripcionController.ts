@@ -73,6 +73,44 @@ export const validar = () => [
             }
         }
     };
+    export const consultarPorFiltro = async (req: Request, res: Response) => {
+        const { estudiante_id, curso_id } = req.params;
+    
+        // Preparar condiciones de filtrado
+        const whereConditions: any = {};
+        if (estudiante_id) {
+            const estudianteIdNumber = Number(estudiante_id);
+            if (!isNaN(estudianteIdNumber)) {
+                whereConditions.estudiante = { id: estudianteIdNumber };
+            }
+        }
+        if (curso_id) {
+            const cursoIdNumber = Number(curso_id);
+            if (!isNaN(cursoIdNumber)) {
+                whereConditions.curso = { id: cursoIdNumber };
+            }
+        }
+    
+        try {
+            const cursoEstudianteRepository = AppDataSource.getRepository(CursoEstudiante);
+            const inscripciones = await cursoEstudianteRepository.find({
+                where: whereConditions,
+                relations: ["curso", "estudiante"] // relaciones
+            });
+    
+            if (inscripciones.length === 0) {
+                return res.status(404).send('No se encontraron inscripciones con los filtros proporcionados');
+            }
+    
+            return res.render('listarInscripciones', { inscripciones }); // Renderiza la vista con los resultados filtrados
+        } catch (err: unknown) {
+            console.error(err);
+            return res.status(500).send('Error en la consulta');
+        }
+    };
+        
+
+
 //FUNCIONA PERO TRAE SIEMPRE TODOS LOS DATOS    
     /*export const consultarInscripciones = async (req: Request, res: Response) => {
         try {
@@ -149,45 +187,7 @@ export const validar = () => [
             }
         }
     };*/
-    export const consultarPorFiltro = async (req: Request, res: Response) => {
-        const { estudiante_id, curso_id } = req.params;
-    
-        // Preparar condiciones de filtrado
-        const whereConditions: any = {};
-        if (estudiante_id) {
-            const estudianteIdNumber = Number(estudiante_id);
-            if (!isNaN(estudianteIdNumber)) {
-                whereConditions.estudiante = { id: estudianteIdNumber };
-            }
-        }
-        if (curso_id) {
-            const cursoIdNumber = Number(curso_id);
-            if (!isNaN(cursoIdNumber)) {
-                whereConditions.curso = { id: cursoIdNumber };
-            }
-        }
-    
-        try {
-            const cursoEstudianteRepository = AppDataSource.getRepository(CursoEstudiante);
-            const inscripciones = await cursoEstudianteRepository.find({
-                where: whereConditions,
-                relations: ["curso", "estudiante"] // relaciones
-            });
-    
-            if (inscripciones.length === 0) {
-                return res.status(404).send('No se encontraron inscripciones con los filtros proporcionados');
-            }
-    
-            console.log(inscripciones);
-            return res.render('listarInscripciones', { inscripciones }); // Renderiza la vista con los resultados filtrados
-        } catch (err: unknown) {
-            console.error(err);
-            return res.status(500).send('Error en la consulta');
-        }
-    };
-        
-
-
+   
 
     export const mostrarFormularioInscripcion = async (req: Request, res: Response) => {
         try {
@@ -196,8 +196,7 @@ export const validar = () => [
             
             const estudiantes = await estudianteRepository.find(); ;
             const cursos = await cursoRepository.find(); ;
-            console.log(estudiantes)
-            console.log(cursos)
+         
             res.render('creaInscripciones', {
                 pagina: 'Crear Inscripción',
                 estudiantes,
@@ -208,7 +207,71 @@ export const validar = () => [
             console.error(error);
             res.status(500).send('Error al cargar el formulario de inscripción');
         }
-    };   
+    };  
+    export const inscribir = async (req: Request, res: Response) => {
+        const errores = validationResult(req);
+    
+        if (!errores.isEmpty()) {
+            console.log(errores);
+            const estudianteRepository = AppDataSource.getRepository(Estudiante);
+            const cursoRepository = AppDataSource.getRepository(Curso);
+    
+            const estudiantes = await estudianteRepository.find();
+            const cursos = await cursoRepository.find();
+            return res.render('creaInscripciones', {
+                pagina: 'Crear Inscripción',
+                estudiantes,
+                cursos,
+                cursoEstudiante
+            });
+        }
+    
+        const { estudiante_id, curso_id, calificacion } = req.body;
+    
+        try {
+            await AppDataSource.transaction(async (transactionalEntityManager) => {
+                const cursoRepository = transactionalEntityManager.getRepository(Curso);
+                const estudianteRepository = transactionalEntityManager.getRepository(Estudiante);
+                const cursoEstudianteRepository = transactionalEntityManager.getRepository(CursoEstudiante);
+    
+                const existeEstudiante = await estudianteRepository.findOne({ where: { id: Number(estudiante_id) } });
+                if (!existeEstudiante) {
+                    return res.status(404).json({ mensaje: 'El estudiante no existe.' });
+                }
+    
+                const existeCurso = await cursoRepository.findOne({ where: { id: Number(curso_id) } });
+                if (!existeCurso) {
+                    return res.status(404).json({ mensaje: 'El curso no existe.' });
+                }
+    
+                const inscripto = await cursoEstudianteRepository.findOne({
+                    where: { estudiante: { id: estudiante_id }, curso: { id: curso_id } }
+                });
+                if (inscripto) {
+                    return res.status(400).json({ mensaje: 'El estudiante ya está inscripto en este curso.' });
+                }
+    
+                // Verificar si se proporcionó la calificación
+                const nuevaInscripcion = cursoEstudianteRepository.create({
+                    estudiante_id: Number(estudiante_id),
+                    curso_id: Number(curso_id),
+                    nota: calificacion || "No especificado" // Si no se proporciona, usa "No especificado"
+                });
+    
+                await cursoEstudianteRepository.save(nuevaInscripcion);
+            });
+    
+            res.redirect('/CursosEstudiantes/listarInscripciones');
+    
+        } catch (err) {
+            console.error(err);
+            if (err instanceof Error) {
+                res.status(500).send(err.message);
+            }
+        }
+    };
+        
+/*FUNCIONA    
   export const inscribir = async (req: Request, res: Response) => {
         const errores = validationResult(req);
         
@@ -269,7 +332,7 @@ export const validar = () => [
                     nota: calificacion // Asegúrate de que esto sea el campo correcto
                 });*/
                 
-               const nuevaInscripcion = cursoEstudianteRepository.create({
+        /*       const nuevaInscripcion = cursoEstudianteRepository.create({
                     
                     estudiante_id: Number(estudiante_id), // Usar el id directamente
                     curso_id:  Number(curso_id), // Usar el id directamente
@@ -289,7 +352,7 @@ export const validar = () => [
                 res.status(500).send(err.message);
             }
         }
-    };
+    };*/
    
     export const modificar = async (req: Request, res: Response) => {
         try {
